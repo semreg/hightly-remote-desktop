@@ -15,6 +15,7 @@
   "javascript.format.enable": false,
   "typescript.validate.enable": false,
   "typescript.format.enable": false,
+  "flow.enabled": true,
 
   "flow.useNPMPackagedFlow": true,
   "search.exclude": {

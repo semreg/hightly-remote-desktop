@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <!-- Font Awesome -->
+  <!-- <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"> -->
+  <!-- Bootstrap core CSS -->
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"> -->
+  <!-- Material Design Bootstrap -->
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.10/css/mdb.min.css" rel="stylesheet"> -->
+</head>
+<body>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    video::-webkit-media-controls {
+      display:none !important;
+    }
+
+    video::-moz-media-controls {
+      display:none !important;
+    }
+    .video-wrapper {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      background-image: url("chrome://global/skin/media/imagedoc-darknoise.png");
+      background-color: rgb(33,33,33);
+    }
+    .video-wrapper > #video {
+      cursor: none;
+      position: fixed;
+      z-index: 2;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      margin: auto;
+      width: 100%;
+      height: 100%;
+      max-width: 1200px;
+      max-height: 720px;
+      background-color: tomato;
+      user-select: none;
+      -moz-user-focus: normal;
+    }
+  </style>
+
+<button type="button" class="btn btn-secondary" id='show'>show</button>
+
+<div id="logs"></div>
+
+  <div id='videoWrapper' class="video-wrapper">
+    <!-- <video id='video' src="https://www.w3schools.com/howto/rain.mp4" autoplay="autoplay"></video> -->
+    <div id="video"></div>
+  </div>
+  <!-- JQuery -->
+  <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script> -->
+  <!-- Bootstrap tooltips -->
+  <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.4/umd/popper.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.min.js"></script> -->
+  <!-- MDB core JavaScript -->
+  <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.10/js/mdb.min.js"></script> -->
+  <script>
+    const socket = new WebSocket("ws://192.168.255.135:3012")
+    const video = document.querySelector("#video")
+
+    console.log(video)
+
+  socket.onopen = () => {
+    console.log('Connection established');
+
+    // const defaultMsg = {
+    //   action_type: '',
+    //   payload: {
+    //     coords: [],
+    //     // deltaY: 0,
+    //     // deltaX: 0,
+    //     // key: 0
+    //   }
+    // }
+
+    // socket.send(JSON.stringify(msg))
+  };
+
+  socket.onclose = event => {
+    if (event.wasClean) {
+      console.log('Connection gracefully closed');
+    } else {
+      console.log('Disconnected')
+    }
+    console.log(`Code: ${event.code} reason: ${event.reason}`)
+  }
+
+  socket.onmessage = event => {
+    console.log(event.data)
+  }
+
+  socket.onerror = error => {
+    console.log(`Error ${error.message}`)
+  }
+
+    let isToggled = false
+
+    const btn = document.querySelector('#show')
+    const videoWrapper = document.querySelector('#videoWrapper')
+    const logs = document.querySelector('#logs')
+
+    const defaultMsg = { 
+        action_type: 'MouseUp',
+        payload: {
+          coords: [0, 0],
+          deltaY: 0,
+          key: 'k'
+        } 
+      }
+
+    let props1 = {
+      width: 1280,
+      heigth: 720
+    }
+
+    const props2 = {
+      width: 1920,
+      heigth: 1080
+    }
+
+    const getNaturalCoords = naturalProps => currentProps => xy => 
+      [
+        ~~(xy[0] * naturalProps.width / currentProps.width),
+        ~~(xy[1] * naturalProps.heigth / currentProps.heigth)
+      ]
+
+    function getCoordinates (e) {
+      const rect = e.target.getBoundingClientRect()
+
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+
+      return [x, y]
+    }
+
+    function log (msg) {
+      logs.innerHTML += `
+        <p>
+          <code>${msg}</code>
+        </p>
+      `
+    }
+
+    btn.addEventListener('click', () => {
+      videoWrapper.style.display = 'block'
+
+      props1 = {
+        width: video.clientWidth,
+        heigth: video.clientHeight
+      }
+    })
+
+    // document.addEventListener('contextmenu', () => false)
+
+    videoWrapper.addEventListener('dblclick', e => {
+      if (e.target !== video) {
+        videoWrapper.style.display = 'none'
+      }
+    })
+
+    let isMouseDown = false
+    
+    video.addEventListener('mousedown', e => {
+      isMouseDown = true
+
+      const coords = getNaturalCoords(props2)(props1)(getCoordinates(e))
+
+      console.log(`mouse down at: ${JSON.stringify(coords)}`)
+
+      let msg = { 
+        action_type: 'MouseDown',
+        payload: {
+          ...defaultMsg.payload,
+          coords
+        } 
+      }
+
+      socket.send(JSON.stringify(msg))
+    })
+    video.addEventListener('mouseup', e => {
+      isMouseDown = false
+
+      const coords = getNaturalCoords(props2)(props1)(getCoordinates(e))
+
+      console.log(`mouse down at: ${JSON.stringify(coords)}`)
+      
+      let msg = { 
+        action_type: 'MouseUp',
+        payload: {
+          ...defaultMsg.payload,
+          coords
+        } 
+      }
+
+      socket.send(JSON.stringify(msg))
+    })
+    video.addEventListener('mousemove', e => {
+      //if (isMouseDown) {
+        const coords = getNaturalCoords(props2)(props1)(getCoordinates(e))
+
+        console.log(`mouse down at: ${JSON.stringify(coords)}`)
+        
+        let msg = { 
+          action_type: 'MouseMove',
+          payload: {
+            ...defaultMsg.payload,
+            coords
+          } 
+        }
+
+        socket.send(JSON.stringify(msg))
+      //}
+    })
+    video.addEventListener('wheel', e => {
+      const coords = getNaturalCoords(props2)(props1)(getCoordinates(e))
+
+      console.log(`mouse down at: ${JSON.stringify(coords)}`)
+      
+      const deltaY = ~~(e.deltaY > 10 || e.deltaY < -10 ? e.deltaY * 0.03 : e.deltaY)  
+
+      console.log(deltaY)
+
+      let msg = { 
+        action_type: 'Wheel',
+        payload: {
+          ...defaultMsg.payload,
+          coords,
+          deltaY
+        } 
+      }
+
+      socket.send(JSON.stringify(msg))
+    })
+
+    video.addEventListener('contextmenu', e => {
+      e.preventDefault()
+
+      const coords = getNaturalCoords(props2)(props1)(getCoordinates(e))
+
+      console.log(`mouse right at: ${JSON.stringify(coords)}`)
+
+      let msg = { 
+        action_type: 'MouseRight',
+        payload: {
+          ...defaultMsg.payload,
+          coords,
+        } 
+      }
+
+      socket.send(JSON.stringify(msg))
+      return false
+    })
+
+    document.addEventListener('keydown', e => {
+      if (isToggled) {
+        e.preventDefault()
+        let msg = { 
+          action_type: 'KeyDown',
+          payload: {
+            ...defaultMsg.payload,
+            key: e.key
+          } 
+        }
+
+        console.log(`Key up: ${e.key}`)
+        socket.send(JSON.stringify(msg))
+      }
+    })
+
+    document.addEventListener('keyup', e => {
+      if (isToggled) {
+        e.preventDefault()
+
+        let msg = { 
+          action_type: 'KeyUp',
+          payload: {
+            ...defaultMsg.payload,
+            key: e.key
+          } 
+        }
+
+        console.log(`Key up: ${e.key}`)
+        socket.send(JSON.stringify(msg))
+      }
+    })
+
+  </script>
+</body>
+</html>
