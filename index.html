@@ -75,7 +75,7 @@
   <!-- MDB core JavaScript -->
   <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdbootstrap/4.8.10/js/mdb.min.js"></script> -->
   <script>
-    const socket = new WebSocket("ws://192.168.255.135:3012")
+    const socket = new WebSocket("ws://192.168.0.105:3012")
     const video = document.querySelector("#video")
 
     console.log(video)
@@ -87,7 +87,7 @@
     //   action_type: '',
     //   payload: {
     //     coords: [],
-    //     // deltaY: 0,
+    //     // delta_y: 0,
     //     // deltaX: 0,
     //     // key: 0
     //   }
@@ -123,7 +123,7 @@
         action_type: 'MouseUp',
         payload: {
           coords: [0, 0],
-          deltaY: 0,
+          delta_y: 0,
           key: 'k'
         } 
       }
@@ -236,16 +236,16 @@
 
       console.log(`mouse down at: ${JSON.stringify(coords)}`)
       
-      const deltaY = ~~(e.deltaY > 10 || e.deltaY < -10 ? e.deltaY * 0.03 : e.deltaY)  
+      const delta_y = ~~(e.delta_y > 10 || e.delta_y < -10 ? e.delta_y * 0.03 : e.delta_y)  
 
-      console.log(deltaY)
+      console.log(delta_y)
 
       let msg = { 
         action_type: 'Wheel',
         payload: {
           ...defaultMsg.payload,
           coords,
-          deltaY
+          delta_y
         } 
       }
 
@@ -272,36 +272,32 @@
     })
 
     document.addEventListener('keydown', e => {
-      if (isToggled) {
-        e.preventDefault()
-        let msg = { 
-          action_type: 'KeyDown',
-          payload: {
-            ...defaultMsg.payload,
-            key: e.key
-          } 
-        }
-
-        console.log(`Key up: ${e.key}`)
-        socket.send(JSON.stringify(msg))
+      e.preventDefault()
+      let msg = { 
+        action_type: 'KeyDown',
+        payload: {
+          ...defaultMsg.payload,
+          key: e.key
+        } 
       }
+
+      console.log(`Key up: ${e.key}`)
+      socket.send(JSON.stringify(msg))
     })
 
     document.addEventListener('keyup', e => {
-      if (isToggled) {
-        e.preventDefault()
+      e.preventDefault()
 
-        let msg = { 
-          action_type: 'KeyUp',
-          payload: {
-            ...defaultMsg.payload,
-            key: e.key
-          } 
-        }
-
-        console.log(`Key up: ${e.key}`)
-        socket.send(JSON.stringify(msg))
+      let msg = { 
+        action_type: 'KeyUp',
+        payload: {
+          ...defaultMsg.payload,
+          key: e.key
+        } 
       }
+
+      console.log(`Key up: ${e.key}`)
+      socket.send(JSON.stringify(msg))
     })
 
   </script>

@@ -27,14 +27,21 @@ custom_derive! {
 #[derive(Serialize, Deserialize)]
 struct InputPayload {
     coords: (i32, i32),
-    deltaY: i32,
+    delta_y: i32,
     key: String
 }
 
 impl Input {
-    pub fn new (msg: &ws::Message) -> Input {
-        let msg_to_str = msg.as_text().unwrap();
-        serde_json::from_str(msg_to_str).unwrap()
+    pub fn new (msg: &ws::Message) -> Result<Input, &str> {
+        match msg.as_text() {
+            Ok(msg_to_str) => {
+                match serde_json::from_str(msg_to_str) {
+                    Ok(input) => Ok(input),
+                    Err(_err) => Err("Error when parsing struct")
+                }
+            },
+            Err(_err) => Err("Error when parsing message")
+        }
     }
 }
 
@@ -48,7 +55,7 @@ impl Input {
         let mut enigo = Enigo::new();
 
         let InputPayload { 
-            deltaY: delta_y,
+            delta_y,
             coords: (x, y), 
             key 
         } = &self.payload;
@@ -75,15 +82,17 @@ impl Input {
                 enigo.mouse_scroll_y(*delta_y);
             },
             InputActionType::KeyDown => {
-                Input::simulate_key_event(&mut enigo, key_string, "DOWN")
+                Input::simulate_key_input(&mut enigo, key_string, "DOWN")
             },
             InputActionType::KeyUp => {
-                Input::simulate_key_event(&mut enigo, key_string, "UP")            
-            },
-            _ => ()
+                Input::simulate_key_input(&mut enigo, key_string, "UP")            
+            }
         }
     }
-    fn simulate_key_event (enigo: &mut Enigo, key_string: String, action_type: &str) {
+
+    fn simulate_key_input (enigo: &mut Enigo, key_string: String, action_type: &str) {
+        // TODO: Contribute to enigo.rs
+        // to implement Key::Raw() and get rid of this match
         let key: Key = match key_string.as_ref() {
             "F12" => Key::F12,
             "F11" => Key::F11,

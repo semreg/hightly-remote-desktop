@@ -1,12 +1,5 @@
 // @flow
 import { app, Menu, shell, BrowserWindow } from 'electron';
-import { spawn } from 'child_process';
-
-const server = spawn('../../target/release/hightly-socket-server');
-
-if (!server) {
-  throw new Error('Problem occured!');
-}
 
 export default class MenuBuilder {
   mainWindow: BrowserWindow;

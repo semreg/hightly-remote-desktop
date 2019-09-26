@@ -13,6 +13,7 @@
 import { app, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { spawn } from 'child_process';
 import MenuBuilder from './menu';
 
 export default class AppUpdater {
@@ -47,10 +48,6 @@ const installExtensions = async () => {
   ).catch(console.log);
 };
 
-/**
- * Add event listeners...
- */
-
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
   // after all windows have been closed
@@ -60,6 +57,16 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', async () => {
+  const simulationServer = spawn(
+    `${__dirname}/../../target/release/hightly-socket-server`
+  )
+    .on('message', msg => console.log(msg))
+    .on('error', err => console.log(err));
+
+  if (!simulationServer) {
+    throw new Error('Failed to launch simulation server');
+  }
+
   if (
     process.env.NODE_ENV === 'development' ||
     process.env.DEBUG_PROD === 'true'
