@@ -33,6 +33,7 @@ fn main() {
             let msg_to_send: ws::Message = ws::Message::Text(String::from("OK"));
 
             let new_input = Input::new(&msg).unwrap();
+            
             new_input.simulate();            
 
             out.send(msg_to_send)
