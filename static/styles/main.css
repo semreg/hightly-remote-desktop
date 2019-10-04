@@ -9,3 +9,11 @@
 .btn-round {
   border-radius: 10em;
 }
+
+.md-form {
+  margin-top: 0 !important;
+}
+
+input:hover, input:active, input:focus {
+  cursor: pointer;
+}
