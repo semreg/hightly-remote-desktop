@@ -1,0 +1,26 @@
+<body>
+    <nav class="navbar navbar-dark nav-purple">
+      <a class="navbar-brand text-center" href="#">Hightly</a>
+    </nav>
+    <div class="container mt-3">
+        <h2 class="card-title h2 text-center">You are ready to go!</h2>
+        <p class="card-text text-center">Remote desktop functionality is now ready to use! Click "Open App" to start streaming!</p>
+      <hr>
+      <div class="text-center" role="group" aria-label="Basic example">
+        <button 
+          type="button" 
+          class="btn btn-outline-success waves-effect btn-round"
+          onclick="external.invoke('open')"
+        >
+        Open App
+      </button>
+        <button 
+          type="button" 
+          class="btn btn-outline-danger waves-effect btn-round"
+          onclick="external.invoke('exit')"
+        >
+        Stop & Close
+      </button>
+      </div>
+    </div>
+</body>

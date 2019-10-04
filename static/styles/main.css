@@ -1,0 +1,11 @@
+:root {
+  --nav-color: #7873f5
+}
+
+.nav-purple {
+  background-color: #7873f5;
+}
+
+.btn-round {
+  border-radius: 10em;
+}
