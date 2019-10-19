@@ -16,7 +16,7 @@ mod input;
 
 use input::Input;
 use web_view::*;
-use base64::{encode, decode};
+use base64::encode;
 
 fn main() {
     // TODO: Generate random port and test if it is open
@@ -35,7 +35,7 @@ fn main() {
             // The handler needs to take ownership of out, so we use move
             move |msg| {
                 println!("{}", msg);
-                
+
                 let msg_to_send: ws::Message = ws::Message::Text(String::from("OK"));
 
                 let new_input = Input::new(&msg).unwrap();
@@ -49,7 +49,7 @@ fn main() {
         }
     });
 
-    run_view(PORT)
+    run_view(PORT);
 }
 
 fn run_view (port: u16) {

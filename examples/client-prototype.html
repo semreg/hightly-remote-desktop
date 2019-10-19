@@ -40,7 +40,7 @@
       background-color: rgb(33,33,33);
     }
     .video-wrapper > #video {
-      cursor: none;
+      /* cursor: none; */
       position: fixed;
       z-index: 2;
       top: 0;
@@ -50,23 +50,56 @@
       margin: auto;
       width: 100%;
       height: 100%;
-      max-width: 1200px;
-      max-height: 720px;
-      background-color: tomato;
+      /* max-width: 1200px; */
+      /* max-height: 720px; */
+      /* background-color: #0C9; */
+      background-image: url("chrome://global/skin/media/imagedoc-darknoise.png");
+      background-color: rgb(33,33,33);
       user-select: none;
       -moz-user-focus: normal;
+      z-index: 10;
+    }
+    .float {
+      display: none;
+      z-index: 15;
+      position: fixed;
+      width:60px;
+      height:60px;
+      top:40px;
+      right:40px;
+      background-color: tomato;
+      color:#FFF;
+      border-radius:50px;
+      text-align: center;
+      /* box-shadow: 2px 2px 3px #999; */
+    }
+
+    .cursor-none {
+      cursor: none;
+    }
+
+    /* #close {
+      display: none
+    } */
+
+    .my-float{
+      margin-top:22px;
     }
   </style>
 
-<button type="button" class="btn btn-secondary" id='show'>show</button>
+  <button type="button" class="btn btn-secondary" id='show'>show</button>
 
-<div id="logs"></div>
+  <div id="logs"></div>
 
   <div id='videoWrapper' class="video-wrapper">
-    <video id='video' src="https://www.w3schools.com/howto/rain.mp4" autoplay="autoplay"></video>
-    <div id="video"></div>
+    <video id='video' class="cursor-none" src="https://www.w3schools.com/howto/rain.mp4" autoplay="autoplay"></video>
+    <div id="video1"></div>
+    <a href="#" id="close" class="float">
+      <i class="fa fa-times my-float"></i>
+    </a>
   </div>
-  <input type="text" autofocus>
+  
+  <!-- <input type="text" autofocus> -->
   <!-- JQuery -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <!-- Bootstrap tooltips -->
@@ -83,18 +116,6 @@
 
   socket.onopen = () => {
     console.log('Connection established');
-
-    // const defaultMsg = {
-    //   action_type: '',
-    //   payload: {
-    //     coords: [],
-    //     // delta_y: 0,
-    //     // deltaX: 0,
-    //     // key: 0
-    //   }
-    // }
-
-    // socket.send(JSON.stringify(msg))
   };
 
   socket.onclose = event => {
@@ -119,6 +140,8 @@
     const btn = document.querySelector('#show')
     const videoWrapper = document.querySelector('#videoWrapper')
     const logs = document.querySelector('#logs')
+    const closeBtn = document.querySelector('#close')
+    // const video = document.querySelector('#video')
 
     const defaultMsg = { 
         action_type: 'MouseUp',
@@ -162,6 +185,16 @@
       `
     }
 
+    const toggleCloseBtn = () => {
+      closeBtn.style.display = 'block'
+      video.classList.remove('cursor-none')
+
+      setTimeout(() => {
+        closeBtn.style.display = 'none'
+        video.classList.add('cursor-none')
+      }, 2000)
+    }
+
     btn.addEventListener('click', () => {
       videoWrapper.style.display = 'block'
 
@@ -171,13 +204,11 @@
       }
     })
 
-    // document.addEventListener('contextmenu', () => false)
-
-    videoWrapper.addEventListener('dblclick', e => {
-      if (e.target !== video) {
-        videoWrapper.style.display = 'none'
-      }
+    closeBtn.addEventListener('click', () => {
+      videoWrapper.style.display = 'none'
     })
+
+    // document.addEventListener('contextmenu', () => false)
 
     let isMouseDown = false
     
@@ -198,6 +229,11 @@
 
       socket.send(JSON.stringify(msg))
     })
+
+    video.addEventListener('dblclick', e => {
+      toggleCloseBtn()
+    })
+
     video.addEventListener('mouseup', e => {
       isMouseDown = false
 
@@ -280,6 +316,10 @@
           ...defaultMsg.payload,
           key: e.key
         } 
+      }
+
+      if (e.key === 'Escape') {
+        toggleCloseBtn()
       }
 
       console.log(`Key up: ${e.key}`)
